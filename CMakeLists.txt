@@ -11,4 +11,4 @@ add_executable(image_processor
         application.cpp
         parser.cpp
         image.cpp
-        ${filters})
+        ${filters} filters/pinch_filter.cpp)

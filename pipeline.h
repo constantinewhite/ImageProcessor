@@ -13,6 +13,7 @@
 #include "filters/infrared_filter.h"
 #include "filters/twirl_filter.h"
 #include "filters/ripple_filter.h"
+#include "filters/pinch_filter.h"
 
 #include <map>
 
@@ -24,7 +25,8 @@ public:
                      {"-edge", new EdgeDetectionFilter(image)}, {"-blur", new GaussianBlurFilter(image)},
                      {"-emboss", new EmbossFilter(image)},      {"-fisheye", new FishEyeFilter(image)},
                      {"-sepia", new SepiaFilter(image)},        {"-infrared", new InfraRedFilter(image)},
-                     {"-twirl", new TwirlFilter(image)},        {"-ripple", new RippleFilter(image)}};
+                     {"-twirl", new TwirlFilter(image)},        {"-ripple", new RippleFilter(image)},
+                     {"-pinch", new PinchFilter(image)}};
     }
 
     BaseFilter* operator[](const std::string& name) {
