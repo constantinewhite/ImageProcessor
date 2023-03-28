@@ -5,7 +5,7 @@
 bool CropFilter::Apply(const std::vector<double>& parameters) {
 
     if (parameters.size() != 2) {
-        throw std::logic_error("Crop filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     uint32_t new_width = static_cast<uint32_t>(parameters[0]) < image_.GetWidth() ? static_cast<uint32_t>(parameters[0])

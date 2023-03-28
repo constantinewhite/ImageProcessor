@@ -3,7 +3,7 @@
 bool EdgeDetectionFilter::Apply(const std::vector<double>& parameters) {
 
     if (parameters.size() != 1) {
-        throw std::logic_error("Edge detection filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     IntPixelMatrix int_image = ApplyMatrix(matrix_);

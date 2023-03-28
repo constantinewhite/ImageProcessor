@@ -5,7 +5,7 @@
 bool RippleFilter::Apply(const std::vector<double>& parameters) {
 
     if (parameters.size() != 2) {
-        throw std::logic_error("Ripple filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     PixelMatrix& image = image_.GetBody();

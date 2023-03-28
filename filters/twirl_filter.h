@@ -9,5 +9,9 @@ public:
 
     bool Apply(const std::vector<double>& parameters) override;
 
+    std::string GetName() const override {
+        return "Twirl";
+    }
+
     ~TwirlFilter() override = default;
 };

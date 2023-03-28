@@ -3,6 +3,11 @@
 #include <cmath>
 
 bool TwirlFilter::Apply(const std::vector<double>& parameters) {
+
+    if (parameters.size() != 2) {
+        return false;
+    }
+
     PixelMatrix& image = image_.GetBody();
 
     uint32_t height = image_.GetHeight();

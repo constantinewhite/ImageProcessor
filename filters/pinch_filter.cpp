@@ -5,6 +5,11 @@
 const double MIDDLE = 2.0;
 
 bool PinchFilter::Apply(const std::vector<double>& parameters) {
+
+    if (parameters.size() != 1 && parameters.size() != 3) {
+        return false;
+    }
+
     PixelMatrix& image = image_.GetBody();
 
     uint32_t height = image_.GetHeight();

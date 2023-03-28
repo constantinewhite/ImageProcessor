@@ -6,8 +6,9 @@ int const KERNEL_SIZE = 3;
 float const OFFSET = 0.5;
 
 bool GaussianBlurFilter::Apply(const std::vector<double>& parameters) {
+
     if (parameters.size() != 1) {
-        throw std::logic_error("Gaussian blur filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     PixelMatrix& image = image_.GetBody();

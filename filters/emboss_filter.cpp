@@ -8,7 +8,7 @@ const double COLORS_COUNT = 3.0;
 bool EmbossFilter::Apply(const std::vector<double>& parameters) {
 
     if (parameters.size() != 1) {
-        throw std::logic_error("Emboss filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     PixelMatrix& image = image_.GetBody();

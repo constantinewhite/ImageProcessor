@@ -15,6 +15,8 @@ public:
 
     virtual bool Apply(const std::vector<double>& parameters) = 0;
 
+    virtual std::string GetName() const = 0;
+
     virtual ~BaseFilter() = default;
 
 protected:

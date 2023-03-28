@@ -19,10 +19,13 @@ int Application::Run(int arg_count, char** arguments) {
     Pipeline pipeline(image);
 
     for (auto [name, params] : parser.GetFilters()) {
+        BaseFilter* filter = pipeline[name];
         try {
-            pipeline[name]->Apply(params);
-        } catch (std::logic_error& e) {
-            std::cout << e.what() << std::endl;
+            if (!filter->Apply(params)) {
+                std::cout << filter->GetName() << " was not applied" << std::endl;
+            }
+        } catch (std::exception& e) {
+            std::cout << filter->GetName() << " can not be applied: " << e.what() << std::endl;
         }
     }
 

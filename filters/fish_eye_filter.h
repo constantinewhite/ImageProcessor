@@ -24,5 +24,9 @@ public:
 
     bool Apply(const std::vector<double>& parameters) override;
 
+    std::string GetName() const override {
+        return "Fish Eye";
+    }
+
     ~FishEyeFilter() override = default;
 };

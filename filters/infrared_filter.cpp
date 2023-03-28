@@ -3,7 +3,7 @@
 bool InfraRedFilter::Apply(const std::vector<double>& parameters) {
 
     if (!parameters.empty()) {
-        throw std::logic_error("Infrared filter can't be applied: wrong number of arguments");
+        return false;
     }
 
     for (Row& row : image_.GetBody()) {
