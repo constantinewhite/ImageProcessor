@@ -3,10 +3,11 @@
 #include <stdexcept>
 #include <fstream>
 
-int const BITS_IN_BYTE = 32;
+int const VALUES_IN_BYTE = 32;
 int const PAD_ROW = 4;
 int const SIGN = 0x4D42;
-int const DIB_HEADER_SIZE = 40;
+int const BITMAP_INFO_HEADER_SIZE = 40;
+int const BITMAP_V5_HEADER_SIZE = 124;
 int const BPP = 24;
 
 bool Image::ReadFile(const std::string& file_name) {
@@ -18,7 +19,10 @@ bool Image::ReadFile(const std::string& file_name) {
     if (!file.is_open()) {
         return false;
     }
-    if (!ReadHeader(file)) {
+    if (!ReadFileHeader(file)) {
+        return false;
+    }
+    if (!ReadDibHeader(file)) {
         return false;
     }
     if (!ReadBody(file)) {
@@ -27,30 +31,37 @@ bool Image::ReadFile(const std::string& file_name) {
     return true;
 }
 
-bool Image::ReadHeader(std::fstream &file) {
-    file.read(reinterpret_cast<char *>(&header_), sizeof(Header));
-    if (header_.signature != SIGN) {
+bool Image::ReadFileHeader(std::fstream &file) {
+    file.read(reinterpret_cast<char *>(&file_header_), sizeof(BitmapFileHeader));
+    if (file_header_.signature != SIGN) {
         return false;
     }
-    if (header_.dib_header_size != DIB_HEADER_SIZE) {
+    return true;
+}
+
+bool Image::ReadDibHeader(std::fstream &file) {
+    file.read(reinterpret_cast<char *>(&bitmap_info_header_), sizeof(BitmapInfoHeader));
+    if (bitmap_info_header_.dib_header_size == BITMAP_V5_HEADER_SIZE) {
+        file.read(reinterpret_cast<char *>(&bitmap_v5_header_), sizeof(BitmapV5Header));
+    } else if (bitmap_info_header_.dib_header_size != BITMAP_INFO_HEADER_SIZE) {
         return false;
     }
-    if (header_.bpp != BPP) {
+    if (bitmap_info_header_.bpp != BPP) {
         return false;
     }
     return true;
 }
 
 bool Image::ReadBody(std::fstream &file) {
-    body_.resize(header_.height);
-    uint32_t row_size = ((header_.width * header_.bpp + BITS_IN_BYTE - 1) / BITS_IN_BYTE) * 4;
+    body_.resize(bitmap_info_header_.height);
+    uint32_t row_size = ((bitmap_info_header_.width * bitmap_info_header_.bpp + VALUES_IN_BYTE - 1) / VALUES_IN_BYTE) * 4;
     std::vector<char> row_buffer(row_size);
-    for (int i = 0; i < header_.height; ++i) {
+    for (int i = 0; i < bitmap_info_header_.height; ++i) {
         if (!file.read(row_buffer.data(), row_size)) {
             return false;
         }
-        body_[i].resize(header_.width);
-        for (int j = 0; j < header_.width; ++j) {
+        body_[i].resize(bitmap_info_header_.width);
+        for (int j = 0; j < bitmap_info_header_.width; ++j) {
             Pixel &pixel = body_[i][j];
             pixel.b = row_buffer[j * 3];
             pixel.g = row_buffer[j * 3 + 1];
@@ -70,8 +81,10 @@ bool Image::WriteFile(const std::string& file_name) {
     if (!file.is_open()) {
         return false;
     }
-
-    if (!WriteHeader(file)) {
+    if (!WriteFileHeader(file)) {
+        return false;
+    }
+    if (!WriteDibHeader(file)) {
         return false;
     }
     if (!WriteBody(file)) {
@@ -80,18 +93,30 @@ bool Image::WriteFile(const std::string& file_name) {
     return true;
 }
 
-bool Image::WriteHeader(std::fstream &file) {
-    if (!file.write(reinterpret_cast<char *>(&header_), sizeof(header_))) {
+bool Image::WriteFileHeader(std::fstream &file) {
+    if (!file.write(reinterpret_cast<char *>(&file_header_), sizeof(file_header_))) {
         return false;
     }
     return true;
 }
 
+bool Image::WriteDibHeader(std::fstream &file) {
+    if (!file.write(reinterpret_cast<char *>(&bitmap_info_header_), sizeof(bitmap_info_header_))) {
+        return false;
+    }
+    if (bitmap_info_header_.dib_header_size == BITMAP_V5_HEADER_SIZE) {
+        if (!file.write(reinterpret_cast<char *>(&bitmap_v5_header_), sizeof(BitmapV5Header))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Image::WriteBody(std::fstream &file) {
-    uint32_t row_size = ((header_.width * header_.bpp + BITS_IN_BYTE - 1) / BITS_IN_BYTE) * PAD_ROW;
+    uint32_t row_size = ((bitmap_info_header_.width * bitmap_info_header_.bpp + VALUES_IN_BYTE - 1) / VALUES_IN_BYTE) * PAD_ROW;
     std::vector<char> row_buffer(row_size);
-    for (int i = 0; i < header_.height; ++i) {
-        for (int j = 0; j < header_.width; ++j) {
+    for (int i = 0; i < bitmap_info_header_.height; ++i) {
+        for (int j = 0; j < bitmap_info_header_.width; ++j) {
             const Pixel &pixel = body_[i][j];
             row_buffer[j * sizeof(Pixel)] = static_cast<char>(pixel.b);
             row_buffer[j * sizeof(Pixel) + 1] = static_cast<char>(pixel.g);
